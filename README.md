@@ -37,7 +37,7 @@ sudo ./docker/run.sh
 ```shell
 gunicorn -b 0.0.0.0:5000 --workers 4 --threads 100 webapi:app
 ```
--If you want to change port numbers, you shold change 0.0.0.0:**5000**.
+- If you want to change port numbers, you shold change 0.0.0.0:**5000**.
 
 ### Testing
 ```python
