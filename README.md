@@ -21,7 +21,6 @@ Install **nvidia-driver-520**(gpu, cuda-11.8), **nvidia-docker** and **docker** 
     ```
 
 ### Building image
-**Building image**
 ```shell
 sudo chmod u+x ./docker/*.sh
 sudo ./docker/build.sh
