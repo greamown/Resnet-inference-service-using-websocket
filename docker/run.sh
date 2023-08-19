@@ -44,7 +44,7 @@ DOCKER_CMD="docker run \
                 --user root \
                 --rm -it \
                 -v /dev:/dev \
-                --net=host --ipc=host \
+                -p 5000:5000 \
                 -w ${WORKSPACE} \
                 -v `pwd`:${WORKSPACE} \
                 -v /etc/localtime:/etc/localtime:ro \

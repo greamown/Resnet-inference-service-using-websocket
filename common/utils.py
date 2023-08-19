@@ -2,7 +2,7 @@ from flask import jsonify
 import logging, os, shutil
 
 BATCH_SIZE = 1
-WEIGHTS_PTAH = "model/resnet18_pytorch-2.onnx"
+WEIGHTS_PTAH = "model/resnet18_pytorch-dynamic-v2.onnx"
 LABEL_NAME_PATH = "model/imagenet_classes.txt"
 ALLOWED_EXTENSIONS = {  "label":['txt', 'xml', 'json',
                                     "TXT", "XML", "JSON"],
@@ -26,7 +26,7 @@ def response_content(status:int, data:dict={}, text:str=""):
             "message":text,
             "data":data
         }
-    return jsonify(obj), status
+    return jsonify(str(obj)), status
 
 def read_txt(path:str):
     with open(path) as f:

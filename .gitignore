@@ -1,5 +1,11 @@
+*.png
+*.jpg
+*.jpeg
+*.log
+*.onnx
 __pycache__/
 */__pycache__/
-*.log
-*.tar
-*.onnx
+*/logs/
+*.exe
+!.conf
+!client/images_4/*.png
