@@ -12,18 +12,36 @@ def preprocess_image(img):
     return np.array(result, dtype=np.float32)
 
 def load_onnx():
-    onnx_model = onnx.load(WEIGHTS_PTAH)
-    sess = rt.InferenceSession(WEIGHTS_PTAH)
+    # onnx_model = onnx.load(WEIGHTS_PTAH)
+    # input_all = [node.name for node in onnx_model.graph.input]
+    # input_initializer = [
+    #     node.name for node in onnx_model.graph.initializer
+    # ]
+    # net_feed_input = list(set(input_all) - set(input_initializer))
+    # assert len(net_feed_input) == 1
 
-    input_all = [node.name for node in onnx_model.graph.input]
-    input_initializer = [
-        node.name for node in onnx_model.graph.initializer
+    providers = [
+        ('CUDAExecutionProvider', {
+            'device_id': 0,
+            'arena_extend_strategy': 'kNextPowerOfTwo',
+            'gpu_mem_limit': 4 * 1024 * 1024 * 1024,
+            'cudnn_conv_algo_search': 'EXHAUSTIVE',
+            'do_copy_in_default_stream': True,
+        }),
+        'CPUExecutionProvider',
     ]
-    net_feed_input = list(set(input_all) - set(input_initializer))
-    assert len(net_feed_input) == 1
+    sess = rt.InferenceSession(WEIGHTS_PTAH, providers=providers)
 
     sess_input = sess.get_inputs()[0].name
     sess_output = sess.get_outputs()[0].name
+
+    # Warm UP
+    print("Warmup!!!")
+    input_data = np.random.rand(1,3,224,224).astype(np.float32)
+    num_warmup = 10
+    for i in range(num_warmup):
+        sess.run(None, {sess_input: input_data})
+    print("Warmup end!!!")
     
     return sess, sess_input, sess_output
     
@@ -32,6 +50,17 @@ def onnx_infer(sess, sess_input, sess_output, preprocessed_images):
     pred = onnx_result.squeeze()
     pred = softmax(pred)
     return pred
+
+def onnx_batch_infer(sess, sess_input, sess_output, preprocessed_images, classes):
+    onnx_result = sess.run([sess_output], {sess_input: preprocessed_images})[0]
+    results = []
+    for data in onnx_result:
+        pred = softmax(data)
+        indices = (-pred).argsort()[:5]
+        classes_list = [classes[int(idx)] for idx in indices]
+        result = list(zip(classes_list, pred[indices]))
+        results.append(result)
+    return results
 
 def softmax(x):
     f_x = np.exp(x) / np.sum(np.exp(x))
